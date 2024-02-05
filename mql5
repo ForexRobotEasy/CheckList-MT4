@@ -1,0 +1,132 @@
+
+// Developer: Forex Robot Easy Team
+// Website: forexroboteasy.com
+
+// CheckList MT4 - Trading Robot
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <Controls\Button\Button.mqh>
+
+// Define constants
+#define TICKET_COLUMN 0
+#define SYMBOL_COLUMN 1
+#define TYPE_COLUMN 2
+#define LOTS_COLUMN 3
+#define OPEN_PRICE_COLUMN 4
+#define CLOSE_PRICE_COLUMN 5
+#define PROFIT_COLUMN 6
+#define STATUS_COLUMN 7
+
+// Declare global variables
+CTrade trade;
+int checklistTotalRows;
+string[][] checklist;
+
+// Function to initialize the checklist
+void InitializeChecklist()
+{
+    checklistTotalRows = 0;
+}
+
+// Function to add a trade to the checklist
+void AddTradeToChecklist(int ticket, string symbol, ENUM_TRADE_TYPE type, double lots)
+{
+    if (checklistTotalRows < ArraySize(checklist))
+    {
+        checklist[checklistTotalRows][TICKET_COLUMN] = IntegerToString(ticket);
+        checklist[checklistTotalRows][SYMBOL_COLUMN] = symbol;
+        checklist[checklistTotalRows][TYPE_COLUMN] = TradeTypeToString(type);
+        checklist[checklistTotalRows][LOTS_COLUMN] = DoubleToString(lots);
+        checklist[checklistTotalRows][OPEN_PRICE_COLUMN] = DoubleToString(trade.PositionGetDouble(POSITION_PRICE_OPEN));
+        checklist[checklistTotalRows][CLOSE_PRICE_COLUMN] = '';
+        checklist[checklistTotalRows][PROFIT_COLUMN] = '';
+        checklist[checklistTotalRows][STATUS_COLUMN] = 'Open';
+
+        checklistTotalRows++;
+    }
+}
+
+// Function to close a trade in the checklist
+void CloseTradeInChecklist(int ticket, double closePrice, double profit)
+{
+    for (int i = 0; i < checklistTotalRows; i++)
+    {
+        if (StringToInteger(checklist[i][TICKET_COLUMN]) == ticket)
+        {
+            checklist[i][CLOSE_PRICE_COLUMN] = DoubleToString(closePrice);
+            checklist[i][PROFIT_COLUMN] = DoubleToString(profit);
+            checklist[i][STATUS_COLUMN] = 'Closed';
+            break;
+        }
+    }
+}
+
+// Function to update the checklist display on the screen
+void UpdateChecklistDisplay()
+{
+    // Clear the existing checklist display
+    // ...
+
+    // Display the updated checklist
+    for (int i = 0; i < checklistTotalRows; i++)
+    {
+        for (int j = 0; j < ArraySize(checklist[i]); j++)
+        {
+            // Display checklist[i][j] in the appropriate cell on the screen
+            // ...
+        }
+    }
+}
+
+// Function to handle button clicks on the checklist
+void OnButtonClick(int buttonID)
+{
+    if (buttonID == 1)
+    {
+        // Close the selected trade in the checklist
+        int selectedRow = GetSelectedRow();
+        int ticket = StringToInteger(checklist[selectedRow][TICKET_COLUMN]);
+        double closePrice = /* Get close price from user input */;
+        double profit = /* Calculate profit */;
+        trade.PositionClose(ticket, closePrice, profit);
+
+        // Update the checklist display
+        UpdateChecklistDisplay();
+    }
+}
+
+// Entry point of the program
+int OnInit()
+{
+    // Initialize the checklist
+    InitializeChecklist();
+
+    // Create the checklist display on the screen
+    // ...
+
+    // Create a button for closing trades
+    CButton closeButton;
+    closeButton.Create(1, 'Close Trade', 100, 100, 100, 50);
+    closeButton.SetOnClick(OnButtonClick);
+
+    return(INIT_SUCCEEDED);
+}
+
+// Main loop of the program
+void OnTick()
+{
+    // Update the checklist display periodically
+    if (TimeCurrent() % 60 == 0)
+    {
+        UpdateChecklistDisplay();
+    }
+}
+
+// Exit point of the program
+void OnDeinit(const int reason)
+{
+    // Clean up resources
+    // ...
+}
+
